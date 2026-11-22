@@ -217,12 +217,88 @@ aside{width:296px;min-width:250px;background:#1a1d27;border-right:1px solid #2d3
   /* remove horizontal scroll from inputs in sheet */
   .field input,.field select,.cv-row input{font-size:16px} /* 16px prevents iOS zoom */
 }
+
+/* ── Authentication and workspace dashboard ── */
+body:not(.workspace-open)>header,body:not(.workspace-open)>.workspace{display:none}
+#portal{position:fixed;inset:0;z-index:3000;overflow-y:auto;background:#0f1117;color:#e2e8f0;padding:24px}
+#portal.hidden{display:none}
+.portal-inner{max-width:980px;margin:0 auto}
+.portal-brand{font-size:20px;font-weight:700;color:#a5b4fc;margin:8px 0 28px}
+.auth-card,.dashboard-card{background:#1a1d27;border:1px solid #2d3148;border-radius:14px;padding:24px}
+.auth-card{max-width:440px;margin:8vh auto;text-align:center}
+.auth-card h1{font-size:24px;margin:0 0 10px}
+.auth-card p,.portal-subtitle{color:#94a3b8;line-height:1.6}
+.google-button{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;margin-top:22px;padding:12px;background:#fff;color:#202124;border:0;border-radius:7px;font-size:14px;font-weight:600;cursor:pointer}
+.google-button:disabled{opacity:.55;cursor:not-allowed}
+.portal-error{color:#fca5a5;font-size:13px;line-height:1.5;margin-top:14px}
+.portal-top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:36px 0 22px}
+.portal-top h1{margin:0;font-size:26px}
+.portal-user{display:flex;align-items:center;gap:12px;color:#cbd5e1}
+.portal-avatar{width:36px;height:36px;border-radius:50%;background:#374151;object-fit:cover}
+.workspace-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+.workspace-card{background:#1a1d27;border:1px solid #2d3148;border-radius:12px;padding:18px}
+.workspace-card h2{font-size:16px;margin:0 0 8px;overflow-wrap:anywhere}
+.workspace-card p{font-size:12px;color:#94a3b8;margin:0 0 16px}
+.workspace-card .btn{width:100%}
+.empty-workspaces{grid-column:1/-1;color:#94a3b8;background:#1a1d27;border:1px dashed #374151;border-radius:12px;padding:30px;text-align:center}
+.portal-actions{display:flex;align-items:center;gap:8px}
+.portal-input{background:#0f1117;border:1px solid #374151;border-radius:6px;color:#e2e8f0;padding:9px 10px;min-width:0}
+#workspaceNameInput{width:min(280px,45vw)}
+#workspace-bar{display:flex;align-items:center;gap:8px;min-width:0}
+#currentWorkspaceName{max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#cbd5e1;font-size:12px}
+#accountButton{display:flex;align-items:center;gap:7px;margin-left:4px}
+@media(max-width:640px){
+  #portal{padding:16px}
+  .portal-top{align-items:flex-start;flex-direction:column;margin:22px 0}
+  .auth-card{margin:7vh auto;padding:20px}
+  .portal-actions{width:100%;flex-wrap:wrap}
+  #workspaceNameInput{flex:1}
+  #accountButton .account-label{display:none}
+}
   </style>
 </head>
 <body>
 
+<section id="portal">
+  <div class="portal-inner">
+    <div class="portal-brand">🗺 Geo Mapper</div>
+    <div id="signInView" class="auth-card">
+      <h1>Your maps, in one place</h1>
+      <p>Sign in with Google to create and manage your private mapping workspaces.</p>
+      <button id="googleSignInButton" class="google-button" onclick="signInWithGoogle()" disabled>
+        <span aria-hidden="true">G</span> Continue with Google
+      </button>
+      <p id="authMessage" class="portal-error" role="status">Checking Firebase configuration…</p>
+    </div>
+    <div id="dashboardView" hidden>
+      <div class="portal-top">
+        <div>
+          <h1>Your workspaces</h1>
+          <p class="portal-subtitle">Create a workspace for each map project.</p>
+        </div>
+        <div class="portal-user">
+          <img id="userAvatar" class="portal-avatar" alt="" hidden />
+          <span id="userDisplayName"></span>
+          <button class="btn btn-ghost btn-sm" onclick="signOutUser()">Sign out</button>
+        </div>
+      </div>
+      <div class="portal-actions" style="margin-bottom:18px">
+        <input id="workspaceNameInput" class="portal-input" type="text" maxlength="60" placeholder="Workspace name" aria-label="Workspace name" />
+        <button class="btn" onclick="createWorkspace()">+ New workspace</button>
+      </div>
+      <p id="dashboardMessage" class="portal-error" role="status"></p>
+      <div id="workspaceGrid" class="workspace-grid"></div>
+    </div>
+  </div>
+</section>
+
 <header>
   <span class="brand">🗺 Polygon Map Viewer</span>
+  <div id="workspace-bar">
+    <button class="btn btn-sm btn-ghost" onclick="showDashboard()">← Workspaces</button>
+    <span id="currentWorkspaceName"></span>
+    <span id="workspaceSaveStatus" role="status" aria-live="polite"></span>
+  </div>
   <div class="vdiv"></div>
   <div class="provider-tabs">
     <button class="ptab" id="tab-leaflet" onclick="switchProvider('leaflet')">🌿 OpenStreetMap (Free)</button>
@@ -246,6 +322,10 @@ aside{width:296px;min-width:250px;background:#1a1d27;border-right:1px solid #2d3
     <button class="btn" id="loadBtn" onclick="loadGoogleMap()">Load Map</button>
   </div>
   <div class="hdr-actions">
+    <button class="btn btn-sm btn-ghost" id="accountButton" onclick="signOutUser()" title="Sign out">
+      <img id="headerAvatar" class="portal-avatar" alt="" hidden />
+      <span class="account-label" id="headerUserName">Account</span>
+    </button>
     <button class="btn btn-sm btn-ghost" id="coordToggle" onclick="toggleCoordBar()" title="Show/hide cursor coordinates">📍 Coords</button>
     <button class="btn btn-sm" onclick="exportKML()" title="Download KML file (Google Earth Desktop)">⬇ KML</button>
     <button class="btn btn-sm" style="background:#1a73e8" onclick="openGoogleEarthWeb()" title="View in Google Earth Web">🌍 Earth</button>
@@ -408,8 +488,314 @@ aside{width:296px;min-width:250px;background:#1a1d27;border-right:1px solid #2d3
   </div>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js"></script>
 <script>
+const FIREBASE_CONFIG={
+  apiKey:'YOUR_FIREBASE_API_KEY',
+  authDomain:'YOUR_FIREBASE_PROJECT.firebaseapp.com',
+  projectId:'YOUR_FIREBASE_PROJECT_ID',
+  appId:'YOUR_FIREBASE_APP_ID',
+};
+let authClient=null,firestore=null,currentUser=null,currentWorkspace=null;
+let workspaceSaveTimer=null,workspaceSaveQueue=Promise.resolve();
+
+function setPortalMessage(id,message,isError=true){
+  const el=document.getElementById(id);
+  el.textContent=message;
+  el.style.color=isError?'#fca5a5':'#94a3b8';
+}
+
+function firebaseIsConfigured(){
+  return Object.values(FIREBASE_CONFIG).every(value=>value&&!value.includes('YOUR_'));
+}
+
+function initializeFirebase(){
+  const signInButton=document.getElementById('googleSignInButton');
+  if(!firebaseIsConfigured()){
+    setPortalMessage('authMessage','Set your Firebase web app config in FIREBASE_CONFIG and enable Google sign-in + Firestore.');
+    return;
+  }
+  try{
+    firebase.initializeApp(FIREBASE_CONFIG);
+    authClient=firebase.auth();
+    firestore=firebase.firestore();
+    authClient.onAuthStateChanged(async user=>{
+      currentUser=user;
+      signInButton.disabled=!user;
+      if(user){
+        document.getElementById('signInView').hidden=true;
+        try{
+          await showDashboard();
+        }catch(error){
+          console.error('Workspace dashboard could not be opened:',error);
+          setPortalMessage('dashboardMessage',`Could not open the dashboard: ${error.message}`);
+        }
+      }else{
+        currentWorkspace=null;
+        document.body.classList.remove('workspace-open');
+        document.getElementById('portal').classList.remove('hidden');
+        document.getElementById('dashboardView').hidden=true;
+        document.getElementById('signInView').hidden=false;
+        signInButton.disabled=false;
+        setPortalMessage('authMessage','Sign in with your Google account to continue.',false);
+      }
+    });
+  }catch(error){
+    console.error('Firebase initialization failed:',error);
+    setPortalMessage('authMessage',`Could not initialize Firebase: ${error.message}`);
+  }
+}
+
+async function signInWithGoogle(){
+  if(!authClient)return;
+  const button=document.getElementById('googleSignInButton');
+  button.disabled=true;
+  setPortalMessage('authMessage','Opening Google sign-in…',false);
+  try{
+    await authClient.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+  }catch(error){
+    console.error('Google sign-in failed:',error);
+    setPortalMessage('authMessage',`Google sign-in failed: ${error.message}`);
+    button.disabled=false;
+  }
+}
+
+async function signOutUser(){
+  if(!authClient)return;
+  try{
+    await flushWorkspaceSave();
+  }catch(error){
+    console.error('Pending changes could not be saved before sign-out:',error);
+    if(document.getElementById('dashboardView').hidden){
+      document.getElementById('workspaceSaveStatus').textContent='Changes not saved';
+    }else{
+      setPortalMessage('dashboardMessage',`Could not save workspace changes: ${error.message}`);
+    }
+  }
+  try{
+    await authClient.signOut();
+  }catch(error){
+    console.error('Sign-out failed:',error);
+    if(document.getElementById('dashboardView').hidden){
+      alert(`Could not sign out: ${error.message}`);
+    }else{
+      setPortalMessage('dashboardMessage',`Could not sign out: ${error.message}`);
+    }
+  }
+}
+
+function userWorkspaces(){
+  return firestore.collection('users').doc(currentUser.uid).collection('workspaces');
+}
+
+function defaultWorkspaceZones(){
+  return[{id:1,label:'Hectare 1',color:'#3b82f6',lat:8.465917,lng:125.030083,area:2,shape:'square',rot:0,customVerts:[],visible:true}];
+}
+
+function workspaceZoneData(){
+  return zones.map(z=>({
+    id:z.id,label:z.label,color:z.color,lat:z.lat,lng:z.lng,area:z.area,
+    shape:z.shape,rot:z.rot,customVerts:z.customVerts,visible:z.visible,
+  }));
+}
+
+function loadWorkspaceZones(records){
+  zoneIdCounter=0;
+  zones=(Array.isArray(records)?records:[]).filter(record=>record&&Number.isFinite(Number(record.id))).map(record=>{
+    const customVerts=Array.isArray(record.customVerts)?record.customVerts
+      .filter(point=>point&&Number.isFinite(Number(point.lat))&&Number.isFinite(Number(point.lng)))
+      .map(point=>({lat:Number(point.lat),lng:Number(point.lng)})):[];
+    return newZone({
+      id:Number(record.id),label:typeof record.label==='string'?record.label:'Untitled zone',
+      color:/^#[0-9a-f]{6}$/i.test(record.color)?record.color:'#3b82f6',
+      lat:Number.isFinite(Number(record.lat))?Number(record.lat):8.465917,
+      lng:Number.isFinite(Number(record.lng))?Number(record.lng):125.030083,
+      area:Number.isFinite(Number(record.area))?Number(record.area):1,
+      shape:['square','rect21','hexagon','oct','custom'].includes(record.shape)?record.shape:'square',
+      rot:Number.isFinite(Number(record.rot))?Number(record.rot):0,
+      customVerts,visible:record.visible!==false,
+    });
+  });
+  zoneIdCounter=zones.reduce((max,z)=>Math.max(max,z.id),0);
+  activeZoneId=zones.length?zones[0].id:null;
+}
+
+async function loadWorkspaces(){
+  const grid=document.getElementById('workspaceGrid');
+  grid.innerHTML='';
+  setPortalMessage('dashboardMessage','Loading workspaces…',false);
+  try{
+    let snapshot=await userWorkspaces().orderBy('updatedAt','desc').get();
+    if(snapshot.empty){
+      await userWorkspaces().add({
+        name:'My first workspace',zones:defaultWorkspaceZones(),
+        createdAt:firebase.firestore.FieldValue.serverTimestamp(),
+        updatedAt:firebase.firestore.FieldValue.serverTimestamp(),
+      });
+      snapshot=await userWorkspaces().orderBy('updatedAt','desc').get();
+    }
+    if(snapshot.empty){
+      setPortalMessage('dashboardMessage','No workspaces were returned. Refresh to try again.');
+      return;
+    }
+    setPortalMessage('dashboardMessage','',false);
+    grid.innerHTML=snapshot.docs.map(doc=>{
+      const data=doc.data();
+      const name=typeof data.name==='string'?data.name:'Untitled workspace';
+      const count=Array.isArray(data.zones)?data.zones.length:0;
+      return`<article class="workspace-card">
+        <h2>${escHtml(name)}</h2>
+        <p>${count} ${count===1?'zone':'zones'}</p>
+        <button class="btn workspace-open-button" data-workspace-id="${doc.id}">Open workspace</button>
+      </article>`;
+    }).join('');
+    grid.querySelectorAll('.workspace-open-button').forEach(button=>{
+      button.addEventListener('click',()=>openWorkspace(button.dataset.workspaceId));
+    });
+  }catch(error){
+    console.error('Workspace list could not be loaded:',error);
+    setPortalMessage('dashboardMessage',`Could not load workspaces: ${error.message}`);
+  }
+}
+
+async function showDashboard(){
+  if(!currentUser)return;
+  document.body.classList.remove('workspace-open');
+  document.getElementById('portal').classList.remove('hidden');
+  document.getElementById('signInView').hidden=true;
+  document.getElementById('dashboardView').hidden=false;
+  document.getElementById('userDisplayName').textContent=currentUser.displayName||currentUser.email||'Google user';
+  document.getElementById('headerUserName').textContent=currentUser.displayName||'Account';
+  const avatar=document.getElementById('userAvatar');
+  const headerAvatar=document.getElementById('headerAvatar');
+  if(currentUser.photoURL){
+    avatar.src=currentUser.photoURL;avatar.hidden=false;
+    headerAvatar.src=currentUser.photoURL;headerAvatar.hidden=false;
+  }else{
+    avatar.hidden=true;headerAvatar.hidden=true;
+  }
+  try{
+    await flushWorkspaceSave();
+  }catch(error){
+    console.error('Pending workspace changes could not be saved:',error);
+    setPortalMessage('dashboardMessage',`Workspace save failed: ${error.message}`);
+  }
+  await loadWorkspaces();
+}
+
+async function createWorkspace(){
+  const input=document.getElementById('workspaceNameInput');
+  const name=input.value.trim();
+  if(!name){
+    setPortalMessage('dashboardMessage','Enter a workspace name first.');
+    input.focus();
+    return;
+  }
+  const button=document.querySelector('.portal-actions .btn');
+  button.disabled=true;
+  try{
+    const doc=await userWorkspaces().add({
+      name,zones:defaultWorkspaceZones(),
+      createdAt:firebase.firestore.FieldValue.serverTimestamp(),
+      updatedAt:firebase.firestore.FieldValue.serverTimestamp(),
+    });
+    input.value='';
+    await openWorkspace(doc.id);
+  }catch(error){
+    console.error('Workspace creation failed:',error);
+    setPortalMessage('dashboardMessage',`Could not create workspace: ${error.message}`);
+  }finally{
+    button.disabled=false;
+  }
+}
+
+async function openWorkspace(id){
+  try{
+    const snapshot=await userWorkspaces().doc(id).get();
+    if(!snapshot.exists)throw new Error('This workspace no longer exists.');
+    const data=snapshot.data();
+    currentWorkspace={id,name:typeof data.name==='string'?data.name:'Untitled workspace'};
+    if(gmap){
+      zones.forEach(z=>{
+        if(z.gpoly)z.gpoly.setMap(null);
+        if(z.gmarker)z.gmarker.setMap(null);
+        (z.lcustomMarkers||[]).forEach(item=>{if(item.close)item.close();});
+        z.gpoly=null;z.gmarker=null;
+      });
+      gmap=null;
+      document.getElementById('map').innerHTML='';
+    }
+    loadWorkspaceZones(data.zones);
+    document.getElementById('currentWorkspaceName').textContent=currentWorkspace.name;
+    document.getElementById('workspaceSaveStatus').textContent='';
+    document.getElementById('portal').classList.add('hidden');
+    document.body.classList.add('workspace-open');
+    document.getElementById('tile-row').style.display='flex';
+    document.getElementById('gkey-row').style.display='none';
+    provider='leaflet';
+    document.getElementById('tab-leaflet').classList.add('active');
+    document.getElementById('tab-google').classList.remove('active');
+    renderZoneList();
+    if(activeZoneId)selectZone(activeZoneId);else clearSettingsPanel();
+    initLeaflet();
+  }catch(error){
+    console.error('Workspace could not be opened:',error);
+    document.getElementById('portal').classList.remove('hidden');
+    setPortalMessage('dashboardMessage',`Could not open workspace: ${error.message}`);
+  }
+}
+
+function scheduleWorkspaceSave(){
+  if(!currentUser||!currentWorkspace||!firestore)return;
+  clearTimeout(workspaceSaveTimer);
+  workspaceSaveTimer=setTimeout(()=>{
+    workspaceSaveTimer=null;
+    const data=workspaceZoneData();
+    document.getElementById('workspaceSaveStatus').textContent='Saving…';
+    const write=async()=>{
+      if(!currentUser||!currentWorkspace)return;
+      try{
+        await userWorkspaces().doc(currentWorkspace.id).set({
+          zones:data,updatedAt:firebase.firestore.FieldValue.serverTimestamp(),
+        },{merge:true});
+        document.getElementById('workspaceSaveStatus').textContent='Saved';
+        setPortalMessage('dashboardMessage','',false);
+      }catch(error){
+        console.error('Workspace changes could not be saved:',error);
+        document.getElementById('workspaceSaveStatus').textContent='Save failed';
+        setPortalMessage('dashboardMessage',`Workspace save failed: ${error.message}`);
+      }
+    };
+    workspaceSaveQueue=workspaceSaveQueue.then(write,write);
+  },500);
+}
+
+async function flushWorkspaceSave(){
+  if(workspaceSaveTimer){
+    clearTimeout(workspaceSaveTimer);
+    workspaceSaveTimer=null;
+    const data=workspaceZoneData();
+    document.getElementById('workspaceSaveStatus').textContent='Saving…';
+    const write=async()=>{
+      if(!currentUser||!currentWorkspace)return;
+      try{
+        await userWorkspaces().doc(currentWorkspace.id).set({
+          zones:data,updatedAt:firebase.firestore.FieldValue.serverTimestamp(),
+        },{merge:true});
+        document.getElementById('workspaceSaveStatus').textContent='Saved';
+      }catch(error){
+        document.getElementById('workspaceSaveStatus').textContent='Save failed';
+        throw error;
+      }
+    };
+    workspaceSaveQueue=workspaceSaveQueue.then(write,write);
+  }
+  await workspaceSaveQueue;
+}
+
 /* ═══════ ZONE COLORS ═══════ */
 const ZONE_COLORS=['#3b82f6','#eab308','#22c55e','#ef4444','#a855f7','#f97316','#14b8a6','#ec4899'];
 
@@ -544,6 +930,7 @@ function removeZone(id){
   if(activeZoneId===id)activeZoneId=zones.length?zones[zones.length-1].id:null;
   renderZoneList();
   if(activeZoneId)selectZone(activeZoneId);else clearSettingsPanel();
+  scheduleWorkspaceSave();
 }
 
 function toggleZoneVisibility(id,e){
@@ -561,6 +948,7 @@ function toggleZoneVisibility(id,e){
     if(z.gmarker)z.gmarker.setVisible(z.visible);
   }
   renderZoneList();
+  scheduleWorkspaceSave();
 }
 
 function selectZone(id){
@@ -905,6 +1293,7 @@ function vertexCoordLabel(lat,lng){
 
 function drawZone(z){
   if(!z)return;
+  scheduleWorkspaceSave();
   const verts=buildVertices(z);
   const c=z.color;
 
@@ -1235,15 +1624,10 @@ window.addEventListener('resize',()=>{
 });
 
 /* ═══════ BOOT ═══════ */
-zones.push(newZone({label:'Hectare 1',area:2}));
-renderZoneList();selectZone(zones[0].id);
-
-window.addEventListener('load',()=>{
-  document.getElementById('tile-row').style.display='none';
-  document.getElementById('gkey-row').style.display='flex';
-  provider='google';
-  loadGoogleMap();
+document.getElementById('workspaceNameInput').addEventListener('keydown',event=>{
+  if(event.key==='Enter')createWorkspace();
 });
+initializeFirebase();
 </script>
 <style>
 .zone-label-tip{background:rgba(15,17,23,.85)!important;border:none!important;color:#e2e8f0!important;font-size:11px!important;font-weight:600!important;padding:3px 7px!important;border-radius:4px!important;white-space:nowrap!important;}
