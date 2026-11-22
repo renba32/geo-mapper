@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Polygon Map Viewer</title>
+  <style>
+/* ── Leaflet CSS inlined ── */
+.leaflet-pane,.leaflet-tile,.leaflet-marker-icon,.leaflet-marker-shadow,.leaflet-tile-container,.leaflet-pane>svg,.leaflet-pane>canvas,.leaflet-zoom-box,.leaflet-image-layer,.leaflet-layer{position:absolute;left:0;top:0}
+.leaflet-container{overflow:hidden}.leaflet-tile,.leaflet-marker-icon,.leaflet-marker-shadow{-webkit-user-select:none;-moz-user-select:none;user-select:none;-webkit-user-drag:none}
+.leaflet-tile::selection{background:transparent}.leaflet-safari .leaflet-tile{image-rendering:crisp-edges}
+.leaflet-layer{width:100%;height:100%}.leaflet-container.leaflet-touch-zoom{touch-action:pan-x pan-y}
+.leaflet-container.leaflet-touch-drag{touch-action:pinch-zoom}.leaflet-container.leaflet-touch-drag.leaflet-touch-zoom{touch-action:none}
+.leaflet-container{-webkit-tap-highlight-color:transparent;background:#ddd;outline-offset:1px}.leaflet-container a{color:#0078a8}
+.leaflet-zoom-box{width:0;height:0;box-sizing:border-box;z-index:800}.leaflet-overlay-pane svg{-moz-user-select:none}
+.leaflet-pane{z-index:400}.leaflet-tile-pane{z-index:200}.leaflet-overlay-pane{z-index:400}.leaflet-shadow-pane{z-index:500}
+.leaflet-marker-pane{z-index:600}.leaflet-tooltip-pane{z-index:650}.leaflet-popup-pane{z-index:700}
+.leaflet-map-pane canvas{z-index:100}.leaflet-map-pane svg{z-index:200}.leaflet-vml-shape{width:1px;height:1px}
+.lvml{behavior:url(#default#VML);display:inline-block;position:absolute}
+.leaflet-control{position:relative;z-index:800;pointer-events:visiblePainted;pointer-events:auto}
+.leaflet-top,.leaflet-bottom{position:absolute;z-index:1000;pointer-events:none}.leaflet-top{top:0}.leaflet-right{right:0}.leaflet-bottom{bottom:0}.leaflet-left{left:0}
+.leaflet-control{float:left;clear:both}.leaflet-right .leaflet-control{float:right}.leaflet-top .leaflet-control{margin-top:10px}.leaflet-bottom .leaflet-control{margin-bottom:10px}.leaflet-left .leaflet-control{margin-left:10px}.leaflet-right .leaflet-control{margin-right:10px}
+.leaflet-fade-anim .leaflet-popup{opacity:0;transition:opacity .2s linear}.leaflet-fade-anim .leaflet-map-pane .leaflet-popup{opacity:1}
+.leaflet-zoom-animated{transform-origin:0 0}svg.leaflet-zoom-animated{will-change:transform}
+.leaflet-zoom-anim .leaflet-zoom-animated{transition:transform .25s cubic-bezier(0,0,.25,1)}.leaflet-zoom-anim .leaflet-tile,.leaflet-pan-anim .leaflet-tile{transition:none}
+.leaflet-zoom-anim .leaflet-zoom-animated.leaflet-zoom-hide{visibility:hidden}.leaflet-interactive{cursor:pointer}.leaflet-grab{cursor:grab}
+.leaflet-crosshair,.leaflet-crosshair .leaflet-interactive{cursor:crosshair}.leaflet-popup-pane,.leaflet-control{cursor:auto}
+.leaflet-dragging .leaflet-grab,.leaflet-dragging .leaflet-grab .leaflet-interactive,.leaflet-dragging .leaflet-marker-draggable{cursor:move;cursor:grabbing}
+.leaflet-marker-icon,.leaflet-marker-shadow,.leaflet-image-layer,.leaflet-pane>svg path,.leaflet-tile-container{pointer-events:none}
+.leaflet-marker-icon.leaflet-interactive,.leaflet-image-layer.leaflet-interactive,.leaflet-pane>svg path.leaflet-interactive,svg.leaflet-image-layer.leaflet-interactive path{pointer-events:visiblePainted;pointer-events:auto}
+.leaflet-zoom-box{border:2px dotted #38f;background:rgba(255,255,255,.5)}.leaflet-bar{box-shadow:0 1px 5px rgba(0,0,0,.65);border-radius:4px}
+.leaflet-bar a,.leaflet-bar a:hover,.leaflet-bar a:focus{background-color:#fff;border-bottom:1px solid #ccc;width:26px;height:26px;line-height:26px;display:block;text-align:center;text-decoration:none;color:black}
+.leaflet-bar a,.leaflet-control-layers-toggle{background-position:50% 50%;background-repeat:no-repeat;display:block}
+.leaflet-bar a:hover,.leaflet-bar a:focus{background-color:#f4f4f4}.leaflet-bar a:first-child{border-top-left-radius:4px;border-top-right-radius:4px}
+.leaflet-bar a:last-child{border-bottom-left-radius:4px;border-bottom-right-radius:4px;border-bottom:none}.leaflet-bar a.leaflet-disabled{cursor:default;background-color:#f4f4f4;color:#bbb}
+.leaflet-touch .leaflet-bar a{width:30px;height:30px;line-height:30px}.leaflet-touch .leaflet-bar a:first-child{border-top-left-radius:2px;border-top-right-radius:2px}.leaflet-touch .leaflet-bar a:last-child{border-bottom-left-radius:2px;border-bottom-right-radius:2px}
+.leaflet-control-zoom-in,.leaflet-control-zoom-out{font:bold 18px 'Lucida Console',Monaco,monospace;text-indent:1px}
+.leaflet-touch .leaflet-control-zoom-in{font-size:22px}.leaflet-touch .leaflet-control-zoom-out{font-size:20px}
+.leaflet-control-layers{box-shadow:0 1px 5px rgba(0,0,0,.4);background:#fff;border-radius:5px}
+.leaflet-control-layers-toggle{background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAAABmJLR0QA/wD/AP+gvaeTAAAC4ElEQVRIx72WTWhTQRSFz8zcJA+TYFJq3QQqIlJcCCLYKohIUdSFoKCg4EpdSNGFC8GFgiIuRBe6qrpTcSEuXCiuRMGlK0EEf0AsBFqoFEpbaBqSvHfOuIsm5KVNmiYeBsI83Lln5s67914uIv6T+MdxFbgeEbl3AgCMiQjfEBHh9FMKgD0AAnvM3i3yGJPE5Bfxq44dAJcA+BMAR3GGsAIiAJAEJABAAJAEJABAAJAEJABAAJAEJABAAJAEJABAAJAEJABAAJAEJABAAJAEJABAAJAEJABAAJAEJABAAJAEJABAAJAEJABAAJAEJABAAJAEJABAAJAEJABAAJAEJABAAJAEJABAAJAEJABAAJAEJABAAJAEJABAAJAEJABAAJAEJABAAJAEJABAAJAEJABAAA==);width:36px;height:36px}
+.leaflet-retina .leaflet-control-layers-toggle{background-size:26px 26px}.leaflet-touch .leaflet-control-layers-toggle{width:44px;height:44px}
+.leaflet-control-layers .leaflet-control-layers-list,.leaflet-control-layers-expanded .leaflet-control-layers-toggle{display:none}
+.leaflet-control-layers-expanded .leaflet-control-layers-list{display:block;position:relative}
+.leaflet-control-layers-expanded{padding:6px 10px 6px 6px;color:#333;background:#fff}
+.leaflet-control-layers-scrollbar{overflow-y:scroll;overflow-x:hidden;padding-right:5px}.leaflet-control-layers-selector{margin-top:2px;position:relative;top:1px}
+.leaflet-control-layers label{display:block;font-size:13px}.leaflet-control-layers-separator{height:0;border-top:1px solid #ddd;margin:5px -10px 5px -6px}
+.leaflet-container .leaflet-control-attribution{background:rgba(255,255,255,.8);margin:0}
+.leaflet-control-attribution,.leaflet-control-scale-line{padding:0 5px;color:#333;font-size:11px}
+.leaflet-left .leaflet-control-scale{margin-left:5px}.leaflet-bottom .leaflet-control-scale{margin-bottom:5px}
+.leaflet-control-scale-line{border:2px solid #777;border-top:none;line-height:1.1;padding:2px 5px 1px;font-size:11px;white-space:nowrap;overflow:hidden;box-sizing:border-box;background:rgba(255,255,255,.5)}
+.leaflet-control-scale-line:not(:first-child){border-top:2px solid #777;border-bottom:none;margin-top:-2px}
+.leaflet-touch .leaflet-control-attribution,.leaflet-touch .leaflet-control-layers,.leaflet-touch .leaflet-bar{box-shadow:none}
+.leaflet-touch .leaflet-control-layers,.leaflet-touch .leaflet-bar{border:2px solid rgba(0,0,0,.2);background-clip:padding-box}
+.leaflet-popup{position:absolute;text-align:center;margin-bottom:20px}
+.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#fff;color:#333;box-shadow:0 3px 14px rgba(0,0,0,.4)}
+.leaflet-popup-content-wrapper{padding:1px;text-align:left;border-radius:12px}
+.leaflet-popup-tip-container{width:40px;height:20px;position:absolute;left:50%;margin-left:-20px;overflow:hidden;pointer-events:none}
+.leaflet-popup-tip{width:17px;height:17px;padding:1px;margin:-10px auto 0;transform:rotate(45deg)}
+.leaflet-popup-content{margin:13px 24px 13px 20px;line-height:1.3;font-size:13px}
+.leaflet-popup-close-button{position:absolute;top:0;right:0;border:none;text-align:center;width:24px;height:24px;font:16px/24px Tahoma,Verdana,sans-serif;color:#757575;text-decoration:none;background:transparent}
+.leaflet-popup-close-button:hover{color:#585858}.leaflet-popup-scrolled{overflow:auto}
+.leaflet-div-icon{background:#fff;border:1px solid #666}
+.leaflet-tooltip{position:absolute;padding:6px;background:#fff;border:1px solid #fff;border-radius:3px;color:#222;white-space:nowrap;user-select:none;pointer-events:none;box-shadow:0 1px 3px rgba(0,0,0,.4)}
+.leaflet-tooltip-top:before,.leaflet-tooltip-bottom:before,.leaflet-tooltip-left:before,.leaflet-tooltip-right:before{position:absolute;pointer-events:none;border:6px solid transparent;background:transparent;content:""}
+.leaflet-tooltip-bottom{margin-top:6px}.leaflet-tooltip-top{margin-top:-6px}.leaflet-tooltip-left{margin-left:-6px}.leaflet-tooltip-right{margin-left:6px}
+.leaflet-tooltip-top:before{bottom:0;left:50%;margin-left:-6px;border-top-color:#fff}
+.leaflet-tooltip-bottom:before{top:0;left:50%;margin-left:-6px;border-bottom-color:#fff}
+.leaflet-tooltip-left:before{top:50%;right:0;margin-top:-6px;border-left-color:#fff}
+.leaflet-tooltip-right:before{top:50%;left:0;margin-top:-6px;border-right-color:#fff}
+.leaflet-control-attribution a{text-decoration:none}.leaflet-control-attribution a:hover{text-decoration:underline}
+
+/* ── App ── */
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f1117;color:#e2e8f0;height:100dvh;display:flex;flex-direction:column;overflow:hidden}
+
+/* ── Header ── */
+header{background:#1a1d27;border-bottom:1px solid #2d3148;padding:8px 12px;display:flex;align-items:center;gap:8px;flex-wrap:nowrap;min-height:50px;flex-shrink:0}
+.brand{font-size:13px;font-weight:700;color:#7c8cf8;white-space:nowrap}
+.vdiv{width:1px;height:22px;background:#2d3148;flex-shrink:0}
+.provider-tabs{display:flex;gap:3px;background:#0f1117;border:1px solid #2d3148;border-radius:7px;padding:3px;flex-shrink:0}
+.ptab{padding:4px 10px;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer;border:none;background:transparent;color:#64748b;transition:all .15s;white-space:nowrap;min-height:32px}
+.ptab.active{background:#7c8cf8;color:#fff}
+.ptab:hover:not(.active){color:#94a3b8;background:#1a1d27}
+#tile-row{display:flex;align-items:center;gap:6px}
+#tile-row label{font-size:11px;color:#94a3b8;white-space:nowrap}
+#tile-row select,#gkey-row input{background:#0f1117;border:1px solid #2d3148;border-radius:6px;padding:5px 8px;color:#e2e8f0;font-size:12px;outline:none}
+#tile-row select:focus,#gkey-row input:focus{border-color:#7c8cf8}
+#gkey-row{display:flex;align-items:center;gap:6px;flex:1;min-width:0}
+#gkey-row label{font-size:11px;color:#94a3b8;white-space:nowrap}
+#gkey-row input{flex:1;font-family:monospace;min-width:0;max-width:160px}
+.hdr-actions{display:flex;gap:5px;align-items:center;margin-left:auto;flex-shrink:0}
+
+/* ── Buttons ── */
+.btn{background:#7c8cf8;color:#fff;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;transition:background .15s;flex-shrink:0;min-height:32px;touch-action:manipulation}
+.btn:hover{background:#6472f0}.btn:disabled{background:#374151;color:#6b7280;cursor:not-allowed}
+.btn-sm{padding:4px 10px;font-size:11px}
+.btn-danger{background:#dc2626}.btn-danger:hover{background:#b91c1c}
+.btn-ghost{background:transparent;border:1px solid #2d3148;color:#94a3b8}.btn-ghost:hover{background:#1a1d27;color:#e2e8f0}
+.btn-warn{background:#d97706;color:#fff}.btn-warn:hover{background:#b45309}
+
+/* ── Layout ── */
+.workspace{display:flex;flex:1;overflow:hidden;position:relative}
+
+/* ── Sidebar (desktop) ── */
+aside{width:296px;min-width:250px;background:#1a1d27;border-right:1px solid #2d3148;overflow-y:auto;padding:11px;display:flex;flex-direction:column;gap:11px;flex-shrink:0;transition:transform .3s cubic-bezier(.4,0,.2,1)}
+
+/* ── Panels ── */
+.panel{background:#0f1117;border:1px solid #2d3148;border-radius:9px;padding:11px}
+.panel-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
+.panel h3{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#64748b;font-weight:600}
+.field{margin-bottom:7px}.field:last-child{margin-bottom:0}
+.field label{display:block;font-size:11px;color:#94a3b8;margin-bottom:3px}
+.field input,.field select{width:100%;background:#1a1d27;border:1px solid #2d3148;border-radius:5px;padding:6px 9px;color:#e2e8f0;font-size:14px;outline:none;transition:border-color .2s;-webkit-appearance:none}
+.field input:focus,.field select:focus{border-color:#7c8cf8}
+.coord-row{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.area-hint{font-size:11px;color:#64748b;margin-top:4px}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.stat{background:#1a1d27;border-radius:6px;padding:8px;text-align:center}
+.stat .val{font-size:16px;font-weight:700;color:#7c8cf8}
+.stat .lbl{font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:.06em;margin-top:1px}
+.vertex-list{list-style:none;display:flex;flex-direction:column;gap:4px}
+.vertex-list li{display:flex;align-items:center;gap:6px;background:#1a1d27;border-radius:6px;padding:6px 8px}
+.vertex-list li .v-num{font-size:10px;font-weight:700;color:#7c8cf8;min-width:16px;flex-shrink:0}
+.vertex-list li .v-coords{flex:1;display:flex;flex-direction:column;gap:1px}
+.vertex-list li .v-dd{font-size:10px;font-family:monospace;color:#94a3b8}
+.vertex-list li .v-dms{font-size:9.5px;font-family:monospace;color:#64748b}
+.v-copy{background:transparent;border:1px solid #374151;border-radius:4px;color:#64748b;cursor:pointer;padding:3px 6px;font-size:10px;line-height:1;flex-shrink:0;white-space:nowrap;touch-action:manipulation}
+.v-copy:hover{background:#1e2130;color:#94a3b8}
+.v-copy.copied{border-color:#22c55e;color:#22c55e}
+
+/* ── Zone list ── */
+.zone-list{display:flex;flex-direction:column;gap:7px}
+.zone-card{border-radius:8px;border:1px solid #2d3148;overflow:hidden;cursor:pointer;transition:border-color .15s}
+.zone-card.active-zone{border-color:var(--zc)}
+.zone-header{display:flex;align-items:center;gap:8px;padding:10px 10px;background:#0f1117}
+.zone-swatch{width:14px;height:14px;border-radius:3px;flex-shrink:0}
+.zone-name{flex:1;font-size:12px;font-weight:600;color:#e2e8f0}
+.zone-meta{font-size:10px;color:#64748b}
+.zone-actions{display:flex;gap:4px;align-items:center}
+.vis-toggle{cursor:pointer;font-size:14px;padding:4px;opacity:.7;line-height:1;min-width:28px;min-height:28px;display:flex;align-items:center;justify-content:center}
+.vis-toggle:hover{opacity:1}
+
+/* ── Pin mode banner ── */
+#pinBanner{display:none;position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:1300;
+  background:#7c8cf8;color:#fff;border-radius:9px;padding:10px 18px;font-size:12px;font-weight:600;
+  box-shadow:0 4px 20px rgba(0,0,0,.5);white-space:nowrap;cursor:pointer;user-select:none;}
+#pinBanner:hover{background:#6472f0}
+
+/* ── Custom vertex editor ── */
+.cv-row{display:grid;grid-template-columns:auto 1fr 1fr auto;gap:5px;align-items:center;margin-bottom:5px}
+.cv-row input{background:#1a1d27;border:1px solid #2d3148;border-radius:4px;padding:5px 7px;color:#e2e8f0;font-size:13px;font-family:monospace;outline:none;min-width:0}
+.cv-row input:focus{border-color:#7c8cf8}
+.cv-idx{font-size:10px;color:#7c8cf8;font-weight:700;min-width:16px;text-align:right}
+.cv-del{background:transparent;border:1px solid #374151;border-radius:4px;color:#ef4444;cursor:pointer;padding:5px 8px;font-size:12px;line-height:1;min-height:30px;touch-action:manipulation}
+.cv-del:hover{background:#7f1d1d}
+
+/* ── Badge ── */
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;background:#1a1d27;border:1px solid #2d3148;border-radius:20px;padding:4px 10px;color:#94a3b8}
+.badge .dot{width:7px;height:7px;border-radius:50%;background:#64748b}
+.badge.ok .dot{background:#22c55e}.badge.free .dot{background:#10b981}
+
+/* ── Map ── */
+#map-wrap{flex:1;position:relative;overflow:hidden}
+#map{width:100%;height:100%;background:#0f1117}
+#placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:#0f1117;z-index:1200;pointer-events:none}
+#placeholder.hidden{display:none}
+#placeholder svg{opacity:.22}
+#placeholder p{color:#4a5568;font-size:13px;text-align:center;max-width:260px}
+#placeholder p strong{color:#64748b}
+#status-bar{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);z-index:1000}
+
+/* ── FAB (mobile) ── */
+#fab{display:none;position:absolute;bottom:72px;right:16px;z-index:1100;width:52px;height:52px;border-radius:50%;background:#7c8cf8;color:#fff;border:none;font-size:22px;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.5);align-items:center;justify-content:center;touch-action:manipulation}
+#fab:active{background:#6472f0;transform:scale(.95)}
+
+/* ── Bottom sheet (mobile) ── */
+#sheet{display:none;position:absolute;bottom:0;left:0;right:0;z-index:1200;background:#1a1d27;border-top:1px solid #2d3148;border-radius:16px 16px 0 0;max-height:82dvh;overflow:hidden;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);padding-bottom:env(safe-area-inset-bottom,0px);flex-direction:column}
+#sheet.open{transform:translateY(0);display:flex}
+#sheet-topbar{display:flex;align-items:center;padding:8px 12px 6px;flex-shrink:0;border-bottom:1px solid #2d3148;gap:8px}
+#sheet-handle{width:32px;height:4px;background:#374151;border-radius:2px;flex-shrink:0;cursor:grab}
+#sheet-title{flex:1;font-size:13px;font-weight:600;color:#94a3b8;text-align:center}
+#sheet-close{background:#374151;border:none;color:#94a3b8;width:30px;height:30px;border-radius:50%;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;touch-action:manipulation}
+#sheet-close:active{background:#4b5563;color:#e2e8f0}
+#sheet-inner{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+#sheet-overlay{display:none;position:absolute;inset:0;background:rgba(0,0,0,.45);z-index:1150}
+#sheet-overlay.show{display:block}
+
+/* ── Coord bar ── */
+#coordBar{display:none;position:absolute;bottom:10px;right:10px;z-index:1000;background:rgba(15,17,23,.88);border:1px solid #2d3148;border-radius:7px;padding:5px 10px;font-size:11px;font-family:monospace;color:#94a3b8;white-space:nowrap;pointer-events:none;backdrop-filter:blur(4px)}
+#coordBar.visible{display:block}
+
+/* ── Leaflet dark overrides ── */
+.leaflet-container{background:#1a1d27!important}
+.leaflet-container.crosshair-cursor{cursor:crosshair!important}
+.leaflet-popup-content-wrapper{background:#1a1d27;color:#e2e8f0;border:1px solid #2d3148}
+.leaflet-popup-tip{background:#1a1d27}
+.leaflet-bar a,.leaflet-bar a:hover{background:#1a1d27;color:#e2e8f0;border-color:#2d3148}
+.leaflet-control-attribution{background:rgba(26,29,39,.85)!important;color:#64748b!important;font-size:10px!important}
+.leaflet-control-attribution a{color:#7c8cf8!important}
+
+/* ── Mobile responsive ── */
+@media(max-width:640px){
+  header{padding:7px 10px;gap:6px}
+  .brand{font-size:12px}
+  /* hide long labels in header on small screens */
+  #gkey-row label,#tile-row label,.vdiv{display:none}
+  #gkey-row input{max-width:100px;font-size:11px}
+  #gkey-row{min-width:0;flex:0}
+  .ptab{padding:4px 8px;font-size:10px}
+  /* hide sidebar from normal flow; it moves into the bottom sheet */
+  #sidebar{display:none;width:100%;min-width:0;border-right:none;max-height:60dvh}
+  #fab{display:flex}
+  #sheet{display:block}
+  #status-bar{bottom:66px}
+  #coordBar{bottom:66px;right:8px;font-size:10px}
+  #pinBanner{font-size:11px;padding:8px 12px;max-width:calc(100vw - 32px);white-space:normal;text-align:center}
+  /* remove horizontal scroll from inputs in sheet */
+  .field input,.field select,.cv-row input{font-size:16px} /* 16px prevents iOS zoom */
+}
+  </style>
+</head>
+<body>
+
+<header>
+  <span class="brand">🗺 Polygon Map Viewer</span>
+  <div class="vdiv"></div>
+  <div class="provider-tabs">
+    <button class="ptab" id="tab-leaflet" onclick="switchProvider('leaflet')">🌿 OpenStreetMap (Free)</button>
+    <button class="ptab active" id="tab-google" onclick="switchProvider('google')">🔵 Google Maps</button>
+  </div>
+  <div id="tile-row">
+    <label>Tile</label>
+    <select id="tileSelect" onchange="changeTile()">
+      <option value="osm">OpenStreetMap</option>
+      <option value="carto_light">Carto Voyager</option>
+      <option value="satellite">Esri Satellite</option>
+      <option value="esri_street">Esri Street</option>
+      <option value="topo">Esri Topo</option>
+      <option value="cartodb">CartoDB Dark</option>
+    </select>
+  </div>
+  <div id="gkey-row" style="display:flex">
+    <label>API Key</label>
+    <input id="apiKey" type="password" value="AIzaSyC0_dz3uMys9-kyvYNA1ij8XSEBfSMioM8" autocomplete="off"
+           onkeydown="if(event.key==='Enter')loadGoogleMap()"/>
+    <button class="btn" id="loadBtn" onclick="loadGoogleMap()">Load Map</button>
+  </div>
+  <div class="hdr-actions">
+    <button class="btn btn-sm btn-ghost" id="coordToggle" onclick="toggleCoordBar()" title="Show/hide cursor coordinates">📍 Coords</button>
+    <button class="btn btn-sm" onclick="exportKML()" title="Download KML file (Google Earth Desktop)">⬇ KML</button>
+    <button class="btn btn-sm" style="background:#1a73e8" onclick="openGoogleEarthWeb()" title="View in Google Earth Web">🌍 Earth</button>
+  </div>
+</header>
+
+<div class="workspace">
+  <aside id="sidebar">
+
+    <!-- ── Zones Panel ── -->
+    <div class="panel">
+      <div class="panel-hdr">
+        <h3>Hectare Zones</h3>
+        <button class="btn btn-sm" onclick="addZone()">+ Add Zone</button>
+      </div>
+      <div class="zone-list" id="zoneList"></div>
+    </div>
+
+    <!-- ── Active Zone Settings ── -->
+    <div class="panel" id="zoneSettingsPanel">
+      <h3 id="zoneSettingsTitle">Zone Settings</h3>
+      <div style="margin-top:9px">
+        <div class="field">
+          <label>Label</label>
+          <input id="zLabel" type="text" oninput="syncActiveZone()"/>
+        </div>
+        <div class="field">
+          <label>Color</label>
+          <input id="zColor" type="color" style="height:32px;padding:2px 4px;cursor:pointer" oninput="syncActiveZone()"/>
+        </div>
+        <div style="border-top:1px solid #1e2130;margin:9px 0"></div>
+
+        <!-- Center coord — hidden for custom polygon -->
+        <div id="centerSection">
+          <p style="font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:#64748b;margin-bottom:8px">Center Coordinate</p>
+          <div class="coord-row">
+            <div class="field">
+              <label>Latitude</label>
+              <input id="zLat" type="number" step="any" oninput="syncActiveZone()"/>
+            </div>
+            <div class="field">
+              <label>Longitude</label>
+              <input id="zLng" type="number" step="any" oninput="syncActiveZone()"/>
+            </div>
+          </div>
+          <div class="field">
+            <label>DMS (paste to parse)</label>
+            <input id="zDms" type="text" placeholder='8°27′57.8″N 125°01′48.3″E' oninput="parseDMSZone(this.value)"/>
+          </div>
+          <p style="font-size:11px;color:#4b5563;margin:6px 0;line-height:1.5">📍 <strong style="color:#64748b">Drag pin</strong> or <strong style="color:#64748b">click map</strong> to move</p>
+          <div style="border-top:1px solid #1e2130;margin:9px 0"></div>
+        </div>
+
+        <p style="font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:#64748b;margin-bottom:8px">Polygon</p>
+        <div class="field">
+          <label>Area (hectares) — auto-calc for Custom</label>
+          <input id="zArea" type="number" min="0.01" step="0.5" oninput="syncActiveZone()"/>
+        </div>
+        <div class="field">
+          <label>Shape</label>
+          <select id="zShape" onchange="onShapeChange()">
+            <option value="square">Square</option>
+            <option value="rect21">Rectangle 2:1</option>
+            <option value="hexagon">Regular Hexagon</option>
+            <option value="oct">Octagon</option>
+            <option value="custom">Custom Polygon</option>
+          </select>
+        </div>
+
+        <!-- Standard shape controls -->
+        <div id="standardShapeControls">
+          <div class="field">
+            <label>Rotation (°)</label>
+            <input id="zRot" type="number" min="0" max="360" step="1" oninput="syncActiveZone()"/>
+          </div>
+          <p class="area-hint" id="zHint"></p>
+        </div>
+
+        <!-- Custom polygon controls -->
+        <div id="customPolyControls" style="display:none">
+          <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap">
+            <button class="btn btn-sm" id="pinModeBtn" onclick="togglePinMode()" style="flex:1">📍 Pin on Map</button>
+            <button class="btn btn-sm btn-ghost" onclick="addCustomVertex()" style="flex:1">+ Add Row</button>
+          </div>
+          <div id="customVertexEditor" style="margin-bottom:6px"></div>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-sm btn-ghost" onclick="clearCustomVertices()">Clear All</button>
+            <button class="btn btn-sm btn-warn" onclick="importFromStats()">↓ Import Current</button>
+          </div>
+          <p style="font-size:10px;color:#64748b;margin-top:6px;line-height:1.5">
+            Area and perimeter calculated from actual vertices.
+          </p>
+        </div>
+
+        <div style="margin-top:10px;display:flex;gap:7px">
+          <button class="btn" style="flex:1" onclick="applyAllZones()">Apply to Map</button>
+          <button class="btn btn-ghost btn-sm" onclick="fitAllZones()">Fit All</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Stats ── -->
+    <div class="panel">
+      <h3>Active Zone Stats</h3>
+      <div class="stat-grid" style="margin-top:8px">
+        <div class="stat"><div class="val" id="s-area">—</div><div class="lbl">Hectares</div></div>
+        <div class="stat"><div class="val" id="s-m2">—</div><div class="lbl">m²</div></div>
+        <div class="stat"><div class="val" id="s-vertices">—</div><div class="lbl">Vertices</div></div>
+        <div class="stat"><div class="val" id="s-perim">—</div><div class="lbl">Perim (m)</div></div>
+      </div>
+    </div>
+
+    <!-- ── Vertices ── -->
+    <div class="panel">
+      <div class="panel-hdr">
+        <h3>Vertices (Active Zone)</h3>
+        <button class="btn btn-sm btn-ghost" id="coordFmtBtn" onclick="toggleCoordFmt()" title="Toggle coordinate format">DD</button>
+      </div>
+      <ul class="vertex-list" id="vertexList" style="margin-top:4px"></ul>
+    </div>
+
+  </aside>
+
+  <!-- ── Mobile bottom sheet ── -->
+  <div id="sheet-overlay" onclick="closeSheet()"></div>
+  <div id="sheet">
+    <div id="sheet-topbar">
+      <div id="sheet-handle"></div>
+      <div id="sheet-title">Zones &amp; Settings</div>
+      <button id="sheet-close" onclick="closeSheet()" aria-label="Close panel">✕</button>
+    </div>
+    <div id="sheet-inner"></div>
+  </div>
+
+  <!-- ── Mobile FAB ── -->
+  <button id="fab" onclick="openSheet()" aria-label="Open zones panel">☰</button>
+
+  <!-- ── Coord readout ── -->
+  <div id="coordBar"></div>
+
+  <div id="map-wrap">
+    <div id="map"></div>
+    <div id="pinBanner" onclick="togglePinMode()">
+      ✏️ Pinning Mode — Click map to add vertex &nbsp;|&nbsp; Click here to finish
+    </div>
+    <div id="placeholder">
+      <svg width="72" height="72" viewBox="0 0 80 80" fill="none">
+        <rect x="10" y="10" width="60" height="60" rx="6" stroke="#7c8cf8" stroke-width="3"/>
+        <path d="M20 60 L35 25 L50 45 L60 32" stroke="#7c8cf8" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+        <circle cx="35" cy="25" r="4" fill="#7c8cf8"/>
+        <circle cx="50" cy="45" r="4" fill="#7c8cf8"/>
+        <circle cx="20" cy="60" r="4" fill="#7c8cf8"/>
+        <circle cx="60" cy="32" r="4" fill="#7c8cf8"/>
+      </svg>
+      <p id="ph-msg">Loading map…</p>
+    </div>
+    <div id="status-bar">
+      <span class="badge" id="statusBadge"><span class="dot"></span> Initialising</span>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js"></script>
+<script>
+/* ═══════ ZONE COLORS ═══════ */
+const ZONE_COLORS=['#3b82f6','#eab308','#22c55e','#ef4444','#a855f7','#f97316','#14b8a6','#ec4899'];
+
+/* ═══════ GEOMETRY ═══════ */
+function metresPerDeg(lat){const p=lat*Math.PI/180;return{lat:111132.92-559.82*Math.cos(2*p)+1.175*Math.cos(4*p),lng:111412.84*Math.cos(p)-93.5*Math.cos(3*p)};}
+
+function buildVertices(z){
+  if(z.shape==='custom') return z.customVerts||[];
+  const {lat,lng,area:areaHa,shape,rot:rotDeg}=z;
+  const A=areaHa*10000,rot=rotDeg*Math.PI/180,mpd=metresPerDeg(lat);
+  function pt(x,y){const c=Math.cos(rot),s=Math.sin(rot);return{lat:lat+(x*s+y*c)/mpd.lat,lng:lng+(x*c-y*s)/mpd.lng};}
+  if(shape==='square'){const h=Math.sqrt(A)/2;return[[-h,h],[h,h],[h,-h],[-h,-h]].map(([x,y])=>pt(x,y));}
+  if(shape==='rect21'){const h=Math.sqrt(A/2)/2,w=h*2;return[[-w,h],[w,h],[w,-h],[-w,-h]].map(([x,y])=>pt(x,y));}
+  if(shape==='hexagon'){const r=Math.sqrt(2*A/(3*Math.sqrt(3)));return Array.from({length:6},(_,i)=>{const a=i*60*Math.PI/180;return pt(r*Math.cos(a),r*Math.sin(a));});}
+  if(shape==='oct'){const r=Math.sqrt(A/(2*(1+Math.sqrt(2))));return Array.from({length:8},(_,i)=>{const a=i*45*Math.PI/180;return pt(r*Math.cos(a),r*Math.sin(a));});}
+  return[];
+}
+
+function haversine(a,b,c,d){const R=6371000,dL=(c-a)*Math.PI/180,dN=(d-b)*Math.PI/180,x=Math.sin(dL/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dN/2)**2;return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));}
+function perimeter(v){let t=0,n=v.length;for(let i=0;i<n;i++){const a=v[i],b=v[(i+1)%n];t+=haversine(a.lat,a.lng,b.lat,b.lng);}return t;}
+
+// Shoelace on spherical coords (approximation, good for small areas)
+function shoelaceAreaHa(v){
+  if(v.length<3)return 0;
+  const mpd=metresPerDeg(v.reduce((s,p)=>s+p.lat,0)/v.length);
+  let area=0;
+  for(let i=0,n=v.length;i<n;i++){
+    const j=(i+1)%n;
+    area+=(v[j].lng-v[i].lng)*mpd.lng*(v[j].lat+v[i].lat)/2*mpd.lat;
+  }
+  return Math.abs(area)/10000;
+}
+
+function centroid(v){
+  if(!v.length)return{lat:0,lng:0};
+  return{lat:v.reduce((s,p)=>s+p.lat,0)/v.length,lng:v.reduce((s,p)=>s+p.lng,0)/v.length};
+}
+
+function zoneHint(shape,areaHa){
+  const A=areaHa*10000;
+  if(shape==='square'){const s=Math.sqrt(A);return`Side ≈ ${s.toFixed(1)} m`;}
+  if(shape==='rect21'){const h=Math.sqrt(A/2);return`${(h*2).toFixed(1)} m × ${h.toFixed(1)} m`;}
+  if(shape==='hexagon'){return`Circumradius ≈ ${Math.sqrt(2*A/(3*Math.sqrt(3))).toFixed(1)} m`;}
+  if(shape==='oct'){return`Radius ≈ ${Math.sqrt(A/(2*(1+Math.sqrt(2)))).toFixed(1)} m`;}
+  return'';
+}
+
+/* ═══════ COORD FORMAT ═══════ */
+let coordFmt='dd'; // 'dd' = decimal degrees, 'dms' = degrees-minutes-seconds
+
+function toDMS(deg,isLat){
+  const abs=Math.abs(deg);
+  const d=Math.floor(abs);
+  const mf=(abs-d)*60;
+  const m=Math.floor(mf);
+  const s=((mf-m)*60).toFixed(2);
+  const dir=isLat?(deg>=0?'N':'S'):(deg>=0?'E':'W');
+  return`${d}°${m}′${s}″${dir}`;
+}
+
+function fmtCoord(lat,lng,decimals){
+  if(coordFmt==='dms') return`${toDMS(lat,true)} ${toDMS(lng,false)}`;
+  const dp=decimals??6;
+  return`${lat.toFixed(dp)}, ${lng.toFixed(dp)}`;
+}
+
+function toggleCoordFmt(){
+  coordFmt=coordFmt==='dd'?'dms':'dd';
+  const btn=document.getElementById('coordFmtBtn');
+  btn.textContent=coordFmt==='dms'?'DMS':'DD';
+  updateStats();      // refresh sidebar vertex list
+  // refresh map labels by redrawing active zone (and all zones for tooltips)
+  zones.forEach(drawZone);
+}
+
+function copyVertex(btn,coord){
+  navigator.clipboard.writeText(coord).then(()=>{
+    btn.textContent='✓';
+    btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='Copy';btn.classList.remove('copied');},1500);
+  }).catch(()=>{btn.textContent='!';setTimeout(()=>{btn.textContent='Copy';},1500);});
+}
+
+/* ═══════ DMS ═══════ */
+function parseDMSStr(str){
+  const re=/(\d+)[°d]\s*(\d+)[′']\s*([\d.]+)[″"]\s*([NSEW])/gi;
+  const matches=[...str.matchAll(re)];if(matches.length<2)return null;
+  function dec(d,m,s,dir){let v=+d+ +m/60+ +s/3600;return'SW'.includes(dir.toUpperCase())?-v:v;}
+  let la,ln;
+  matches.forEach(m=>{const dir=m[4].toUpperCase(),val=dec(m[1],m[2],m[3],dir);if('NS'.includes(dir))la=val;else ln=val;});
+  return(la!==undefined&&ln!==undefined)?{lat:la,lng:ln}:null;
+}
+function parseDMSZone(str){
+  const r=parseDMSStr(str);if(!r)return;
+  document.getElementById('zLat').value=r.lat.toFixed(7);
+  document.getElementById('zLng').value=r.lng.toFixed(7);
+  syncActiveZone();
+}
+
+/* ═══════ ZONE STATE ═══════ */
+let zones=[],activeZoneId=null,zoneIdCounter=0;
+let pinningMode=false; // when true, map clicks add custom vertices
+
+function newZone(overrides={}){
+  const id=++zoneIdCounter;
+  return Object.assign({
+    id, label:`Hectare ${id}`,
+    color:ZONE_COLORS[(zones.length)%ZONE_COLORS.length],
+    lat:8.465917, lng:125.030083,
+    area:1, shape:'square', rot:0,
+    customVerts:[], // used when shape==='custom'
+    visible:true,
+    lpoly:null,lmarker:null,lcustomMarkers:[],lcustomLine:null,
+    gpoly:null,gmarker:null,
+  },overrides);
+}
+
+function addZone(){
+  const src=zones.find(z=>z.id===activeZoneId);
+  const baseLat=src?src.lat:8.465917;
+  const baseLng=src?src.lng:125.030083;
+  const offset=0.002;
+  const z=newZone({lat:baseLat+offset,lng:baseLng+offset});
+  zones.push(z);
+  renderZoneList();selectZone(z.id);drawZone(z);fitAllZones();
+}
+
+function removeZone(id){
+  const z=zones.find(z=>z.id===id);
+  if(z){if(pinningMode&&activeZoneId===id)exitPinMode();clearZoneLayers(z);}
+  zones=zones.filter(z=>z.id!==id);
+  if(activeZoneId===id)activeZoneId=zones.length?zones[zones.length-1].id:null;
+  renderZoneList();
+  if(activeZoneId)selectZone(activeZoneId);else clearSettingsPanel();
+}
+
+function toggleZoneVisibility(id,e){
+  e.stopPropagation();
+  const z=zones.find(z=>z.id===id);if(!z)return;
+  z.visible=!z.visible;
+  if(provider==='leaflet'){
+    if(z.lpoly){z.visible?z.lpoly.addTo(lmap):lmap.removeLayer(z.lpoly);}
+    if(z.lmarker){z.visible?z.lmarker.addTo(lmap):lmap.removeLayer(z.lmarker);}
+    // custom vertex markers
+    z.lcustomMarkers.forEach(m=>{z.visible?m.addTo(lmap):lmap.removeLayer(m);});
+    if(z.lcustomLine){z.visible?z.lcustomLine.addTo(lmap):lmap.removeLayer(z.lcustomLine);}
+  } else if(provider==='google'){
+    if(z.gpoly)z.gpoly.setVisible(z.visible);
+    if(z.gmarker)z.gmarker.setVisible(z.visible);
+  }
+  renderZoneList();
+}
+
+function selectZone(id){
+  activeZoneId=id;
+  if(pinningMode)exitPinMode();
+  renderZoneList();
+  loadZoneIntoForm(zones.find(z=>z.id===id));
+  updateStats();
+}
+
+function loadZoneIntoForm(z){
+  if(!z)return;
+  document.getElementById('zLabel').value=z.label;
+  document.getElementById('zColor').value=z.color;
+  document.getElementById('zLat').value=z.lat.toFixed(7);
+  document.getElementById('zLng').value=z.lng.toFixed(7);
+  document.getElementById('zArea').value=z.area;
+  document.getElementById('zShape').value=z.shape;
+  document.getElementById('zRot').value=z.rot;
+  document.getElementById('zDms').value='';
+  document.getElementById('zoneSettingsTitle').textContent=`Zone: ${z.label}`;
+  document.getElementById('zHint').textContent=zoneHint(z.shape,z.area);
+  updateShapeUI(z.shape);
+  if(z.shape==='custom')renderCustomVertexEditor(z);
+}
+
+function onShapeChange(){
+  const z=zones.find(z=>z.id===activeZoneId);if(!z)return;
+  const s=document.getElementById('zShape').value;
+  z.shape=s;
+  updateShapeUI(s);
+  if(s==='custom')renderCustomVertexEditor(z);
+  syncActiveZone();
+}
+
+function updateShapeUI(shape){
+  const isCustom=shape==='custom';
+  document.getElementById('centerSection').style.display=isCustom?'none':'';
+  document.getElementById('standardShapeControls').style.display=isCustom?'none':'';
+  document.getElementById('customPolyControls').style.display=isCustom?'':'none';
+  document.getElementById('zArea').readOnly=isCustom;
+  document.getElementById('zArea').style.opacity=isCustom?'0.5':'1';
+}
+
+function syncActiveZone(){
+  const z=zones.find(z=>z.id===activeZoneId);if(!z)return;
+  z.label =document.getElementById('zLabel').value||z.label;
+  z.color =document.getElementById('zColor').value;
+  if(z.shape!=='custom'){
+    z.lat  =parseFloat(document.getElementById('zLat').value)||z.lat;
+    z.lng  =parseFloat(document.getElementById('zLng').value)||z.lng;
+    z.area =parseFloat(document.getElementById('zArea').value)||z.area;
+    z.rot  =parseFloat(document.getElementById('zRot').value)||0;
+  }
+  z.shape=document.getElementById('zShape').value;
+  document.getElementById('zoneSettingsTitle').textContent=`Zone: ${z.label}`;
+  document.getElementById('zHint').textContent=zoneHint(z.shape,z.area);
+  renderZoneList();drawZone(z);updateStats();
+}
+
+function clearSettingsPanel(){
+  ['zLabel','zLat','zLng','zArea','zRot','zDms'].forEach(id=>{document.getElementById(id).value='';});
+  document.getElementById('zoneSettingsTitle').textContent='Zone Settings';
+  document.getElementById('zHint').textContent='';
+  ['s-area','s-m2','s-vertices','s-perim'].forEach(id=>{document.getElementById(id).textContent='—';});
+  document.getElementById('vertexList').innerHTML='';
+}
+
+function updateStats(){
+  const z=zones.find(z=>z.id===activeZoneId);
+  if(!z){clearSettingsPanel();return;}
+  const v=buildVertices(z);
+  const areaHa=z.shape==='custom'?shoelaceAreaHa(v):z.area;
+  if(z.shape==='custom'){
+    document.getElementById('zArea').value=areaHa.toFixed(4);
+  }
+  document.getElementById('s-area').textContent=areaHa.toFixed(3);
+  document.getElementById('s-m2').textContent=Math.round(areaHa*10000).toLocaleString();
+  document.getElementById('s-vertices').textContent=v.length;
+  document.getElementById('s-perim').textContent=Math.round(perimeter(v)).toLocaleString();
+  document.getElementById('vertexList').innerHTML=v.map((p,i)=>{
+    const coord=fmtCoord(p.lat,p.lng);
+    let inner;
+    if(coordFmt==='dms'){
+      const latDms=toDMS(p.lat,true);
+      const lngDms=toDMS(p.lng,false);
+      inner=`<div class="v-dd">${latDms}</div><div class="v-dd">${lngDms}</div>`;
+    } else {
+      const dp=6;
+      inner=`<div class="v-dd">${p.lat.toFixed(dp)}</div><div class="v-dd">${p.lng.toFixed(dp)}</div>`;
+    }
+    return`<li><span class="v-num">${i+1}</span><div class="v-coords">${inner}</div><button class="v-copy" onclick="copyVertex(this,'${coord.replace(/'/g,"\\'")}')">Copy</button></li>`;
+  }).join('');
+}
+
+/* ═══════ CUSTOM POLYGON EDITOR ═══════ */
+function renderCustomVertexEditor(z){
+  if(!z)z=zones.find(z=>z.id===activeZoneId);
+  if(!z||z.shape!=='custom')return;
+  const el=document.getElementById('customVertexEditor');
+  if(!z.customVerts.length){
+    el.innerHTML=`<p style="font-size:11px;color:#4b5563;text-align:center;padding:6px 0">No vertices yet.<br>Click <b style="color:#7c8cf8">📍 Pin on Map</b> or <b style="color:#7c8cf8">+ Add Row</b>.</p>`;
+    return;
+  }
+  el.innerHTML=z.customVerts.map((v,i)=>`
+    <div class="cv-row">
+      <input type="number" step="any" value="${v.lat.toFixed(7)}" placeholder="Lat"
+        onchange="updateCustomVert(${i},'lat',this.value)" style="font-size:11px"/>
+      <input type="number" step="any" value="${v.lng.toFixed(7)}" placeholder="Lng"
+        onchange="updateCustomVert(${i},'lng',this.value)" style="font-size:11px"/>
+      <button class="cv-del" onclick="deleteCustomVert(${i})">✕</button>
+    </div>`).join('');
+  // add index labels before each row
+  const rows=el.querySelectorAll('.cv-row');
+  rows.forEach((r,i)=>{
+    const lbl=document.createElement('span');
+    lbl.className='cv-idx';lbl.textContent=i+1+'.';
+    r.prepend(lbl);
+  });
+}
+
+function addCustomVertex(lat,lng){
+  const z=zones.find(z=>z.id===activeZoneId);if(!z||z.shape!=='custom')return;
+  if(lat===undefined){
+    // default to map center or last vertex offset
+    const last=z.customVerts[z.customVerts.length-1];
+    lat=last?last.lat+0.0005:z.lat;
+    lng=last?last.lng+0.0005:z.lng;
+  }
+  z.customVerts.push({lat:+parseFloat(lat).toFixed(7),lng:+parseFloat(lng).toFixed(7)});
+  renderCustomVertexEditor(z);drawZone(z);updateStats();
+}
+
+function updateCustomVert(i,axis,val){
+  const z=zones.find(z=>z.id===activeZoneId);if(!z)return;
+  z.customVerts[i][axis]=parseFloat(val)||0;
+  drawZone(z);updateStats();
+}
+
+function deleteCustomVert(i){
+  const z=zones.find(z=>z.id===activeZoneId);if(!z)return;
+  z.customVerts.splice(i,1);
+  renderCustomVertexEditor(z);drawZone(z);updateStats();
+}
+
+function clearCustomVertices(){
+  const z=zones.find(z=>z.id===activeZoneId);if(!z)return;
+  z.customVerts=[];
+  renderCustomVertexEditor(z);drawZone(z);updateStats();
+}
+
+// Import current shape's computed vertices into custom verts
+function importFromStats(){
+  const z=zones.find(z=>z.id===activeZoneId);if(!z)return;
+  const prev=z.shape;
+  if(prev==='custom'&&z.customVerts.length>0){return;} // already custom with verts
+  // temporarily switch shape to get vertices, then switch to custom
+  const tmpShape=prev==='custom'?'square':prev;
+  const tmpZ=Object.assign({},z,{shape:tmpShape});
+  const v=buildVertices(tmpZ);
+  z.customVerts=v.map(p=>({lat:p.lat,lng:p.lng}));
+  z.shape='custom';
+  document.getElementById('zShape').value='custom';
+  updateShapeUI('custom');
+  renderCustomVertexEditor(z);drawZone(z);updateStats();
+}
+
+/* ═══════ PIN MODE ═══════ */
+function togglePinMode(){
+  if(pinningMode)exitPinMode();
+  else enterPinMode();
+}
+
+function enterPinMode(){
+  const z=zones.find(z=>z.id===activeZoneId);
+  if(!z||z.shape!=='custom')return;
+  pinningMode=true;
+  document.getElementById('pinBanner').style.display='block';
+  document.getElementById('pinModeBtn').textContent='✅ Done Pinning';
+  document.getElementById('pinModeBtn').classList.add('btn-warn');
+  if(lmap)lmap.getContainer().classList.add('crosshair-cursor');
+  // Google Maps crosshair
+  if(gmap)gmap.setOptions({draggableCursor:'crosshair'});
+}
+
+function exitPinMode(){
+  pinningMode=false;
+  document.getElementById('pinBanner').style.display='none';
+  document.getElementById('pinModeBtn').textContent='📍 Pin on Map';
+  document.getElementById('pinModeBtn').classList.remove('btn-warn');
+  if(lmap)lmap.getContainer().classList.remove('crosshair-cursor');
+  if(gmap)gmap.setOptions({draggableCursor:''});
+}
+
+/* ═══════ ZONE LIST RENDER ═══════ */
+function renderZoneList(){
+  const el=document.getElementById('zoneList');
+  if(!zones.length){
+    el.innerHTML=`<p style="font-size:12px;color:#4b5563;text-align:center;padding:8px 0">No zones yet. Click <strong style="color:#7c8cf8">+ Add Zone</strong>.</p>`;
+    return;
+  }
+  el.innerHTML=zones.map(z=>{
+    const isActive=z.id===activeZoneId;
+    const meta=z.shape==='custom'?`${z.customVerts.length} pts`:`${z.area} ha`;
+    return`<div class="zone-card${isActive?' active-zone':''}" style="--zc:${z.color}" onclick="selectZone(${z.id})">
+      <div class="zone-header">
+        <div class="zone-swatch" style="background:${z.color}"></div>
+        <span class="zone-name">${escHtml(z.label)}</span>
+        <span class="zone-meta">${meta}</span>
+        <div class="zone-actions">
+          <span class="vis-toggle" onclick="toggleZoneVisibility(${z.id},event)" title="${z.visible?'Hide':'Show'}">${z.visible?'👁':'🚫'}</span>
+          <button class="btn btn-sm btn-danger" style="padding:2px 7px;font-size:10px" onclick="event.stopPropagation();removeZone(${z.id})">✕</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+/* ═══════ MAP STATE ═══════ */
+let provider='leaflet';
+let lmap=null,ltile=null;
+let gmap=null,gLoaded=false;
+
+function setStatus(cls,txt){const b=document.getElementById('statusBadge');b.className='badge'+(cls?' '+cls:'');b.innerHTML=`<span class="dot"></span> ${txt}`;}
+
+/* ═══════ TILES ═══════ */
+const TILES={
+  osm:{url:'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',attr:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',max:19,extra:{referrerPolicy:'no-referrer'}},
+  carto_light:{url:'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',attr:'© CARTO | © OSM',max:19,extra:{}},
+  satellite:{url:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',attr:'Tiles © Esri',max:19,extra:{}},
+  esri_street:{url:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',attr:'Tiles © Esri',max:19,extra:{}},
+  topo:{url:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',attr:'Tiles © Esri',max:19,extra:{}},
+  cartodb:{url:'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',attr:'© CARTO | © OSM',max:19,extra:{}},
+};
+
+/* ═══════ LEAFLET ═══════ */
+function initLeaflet(){
+  const lat=zones[0]?.lat||8.465917,lng=zones[0]?.lng||125.030083;
+  if(lmap){lmap.remove();lmap=null;ltile=null;zones.forEach(z=>{z.lpoly=null;z.lmarker=null;z.lcustomMarkers=[];z.lcustomLine=null;});}
+  lmap=L.map('map',{center:[lat,lng],zoom:15});
+  applyTile('osm');
+  document.getElementById('tileSelect').value='osm';
+
+  lmap.on('click',function(e){
+    const z=zones.find(z=>z.id===activeZoneId);if(!z)return;
+    if(pinningMode&&z.shape==='custom'){
+      addCustomVertex(e.latlng.lat,e.latlng.lng);
+      return;
+    }
+    if(z.shape!=='custom'){
+      z.lat=+e.latlng.lat.toFixed(7);z.lng=+e.latlng.lng.toFixed(7);
+      document.getElementById('zLat').value=z.lat;
+      document.getElementById('zLng').value=z.lng;
+      drawZone(z);updateStats();
+    }
+  });
+
+  document.getElementById('placeholder').classList.add('hidden');
+  setStatus('free','🌿 OpenStreetMap — Free, No Key Required');
+  zones.forEach(drawZone);
+  attachCoordListeners();
+  setTimeout(fitAllZones,100);
+}
+
+function applyTile(key){
+  const t=TILES[key]||TILES.osm;
+  if(ltile)lmap.removeLayer(ltile);
+  ltile=L.tileLayer(t.url,Object.assign({attribution:t.attr,maxZoom:t.max},t.extra||{}));
+  ltile.addTo(lmap);
+}
+function changeTile(){if(lmap)applyTile(document.getElementById('tileSelect').value);}
+
+/* ═══════ GOOGLE ═══════ */
+function loadGoogleMap(){
+  const key=document.getElementById('apiKey').value.trim();
+  if(!key){alert('Please enter a Google Maps API key.');return;}
+  document.getElementById('loadBtn').disabled=true;
+  document.getElementById('loadBtn').textContent='Loading…';
+  if(lmap){lmap.remove();lmap=null;zones.forEach(z=>{z.lpoly=null;z.lmarker=null;z.lcustomMarkers=[];z.lcustomLine=null;});}
+  if(gLoaded&&window.google?.maps){initGoogleMap();return;}
+  const old=document.getElementById('gm-script');if(old)old.remove();
+  window.__mapsReady=function(){gLoaded=true;initGoogleMap();};
+  const s=document.createElement('script');s.id='gm-script';
+  s.src=`https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(key)}&callback=__mapsReady`;
+  s.onerror=()=>{alert('Failed to load Google Maps.');document.getElementById('loadBtn').disabled=false;document.getElementById('loadBtn').textContent='Load Map';};
+  document.head.appendChild(s);
+}
+
+function initGoogleMap(){
+  const lat=zones[0]?.lat||8.465917,lng=zones[0]?.lng||125.030083;
+  document.getElementById('map').innerHTML='';
+  gmap=new google.maps.Map(document.getElementById('map'),{center:{lat,lng},zoom:15,mapTypeId:'hybrid',streetViewControl:false});
+  gmap.addListener('click',function(e){
+    const z=zones.find(z=>z.id===activeZoneId);if(!z)return;
+    if(pinningMode&&z.shape==='custom'){
+      addCustomVertex(e.latLng.lat(),e.latLng.lng());
+      return;
+    }
+    if(z.shape!=='custom'){
+      z.lat=+e.latLng.lat().toFixed(7);z.lng=+e.latLng.lng().toFixed(7);
+      document.getElementById('zLat').value=z.lat;
+      document.getElementById('zLng').value=z.lng;
+      drawZone(z);updateStats();
+    }
+  });
+  document.getElementById('placeholder').classList.add('hidden');
+  document.getElementById('loadBtn').disabled=false;
+  document.getElementById('loadBtn').textContent='Reload Map';
+  setStatus('ok','🔵 Google Maps (Hybrid Satellite)');
+  zones.forEach(z=>{z.gpoly=null;z.gmarker=null;drawZone(z);});
+  attachCoordListeners();
+  setTimeout(fitAllZones,200);
+}
+
+/* ═══════ DRAW ZONE ═══════ */
+function clearZoneLayers(z){
+  if(provider==='leaflet'){
+    if(z.lpoly){lmap&&lmap.removeLayer(z.lpoly);z.lpoly=null;}
+    if(z.lmarker){lmap&&lmap.removeLayer(z.lmarker);z.lmarker=null;}
+    (z.lcustomMarkers||[]).forEach(m=>{lmap&&lmap.removeLayer(m);});z.lcustomMarkers=[];
+    if(z.lcustomLine){lmap&&lmap.removeLayer(z.lcustomLine);z.lcustomLine=null;}
+  } else {
+    if(z.gpoly){z.gpoly.setMap(null);z.gpoly=null;}
+    if(z.gmarker){z.gmarker.setMap(null);z.gmarker=null;}
+    // close InfoWindow coord labels
+    (z.lcustomMarkers||[]).forEach(iw=>{try{iw.close();}catch(e){}});z.lcustomMarkers=[];
+  }
+}
+
+function vertexMarkerSvg(c,n){
+  return`<svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="10" cy="10" r="8" fill="${c}" stroke="#fff" stroke-width="2"/>
+    <text x="10" y="14" text-anchor="middle" font-size="9" font-weight="bold" fill="#fff" font-family="sans-serif">${n}</text>
+  </svg>`;
+}
+
+function vertexCoordLabel(lat,lng){
+  return`<div style="line-height:1.5">${toDMS(lat,true)}<br>${toDMS(lng,false)}</div>`;
+}
+
+function drawZone(z){
+  if(!z)return;
+  const verts=buildVertices(z);
+  const c=z.color;
+
+  if(provider==='leaflet'&&lmap){
+    clearZoneLayers(z);
+    if(!z.visible)return;
+
+    if(z.shape==='custom'){
+      // Draw polygon (needs ≥3 vertices)
+      if(verts.length>=3){
+        z.lpoly=L.polygon(verts.map(v=>[v.lat,v.lng]),{
+          color:c,weight:2.5,fillColor:c,fillOpacity:0.22
+        }).addTo(lmap);
+        z.lpoly.bindTooltip(z.label,{permanent:true,direction:'center',className:'zone-label-tip'});
+      } else if(verts.length===2){
+        // Draw a line if only 2 points
+        z.lcustomLine=L.polyline(verts.map(v=>[v.lat,v.lng]),{color:c,weight:2.5,dashArray:'6,4'}).addTo(lmap);
+      }
+      // Draw numbered vertex markers with coordinate tooltips
+      z.lcustomMarkers=verts.map((v,i)=>{
+        const m=L.marker([v.lat,v.lng],{
+          draggable:true,
+          icon:L.divIcon({className:'',html:vertexMarkerSvg(c,i+1),iconSize:[20,20],iconAnchor:[10,10]})
+        }).addTo(lmap);
+        m.bindTooltip(vertexCoordLabel(v.lat,v.lng),{
+          permanent:true,direction:'top',offset:[0,-12],
+          className:'vertex-coord-tip'
+        });
+        m.on('drag',function(e){
+          const p=e.target.getLatLng();
+          m.setTooltipContent(vertexCoordLabel(p.lat,p.lng));
+        });
+        m.on('dragend',function(e){
+          const p=e.target.getLatLng();
+          z.customVerts[i]={lat:+p.lat.toFixed(7),lng:+p.lng.toFixed(7)};
+          m.setTooltipContent(vertexCoordLabel(p.lat,p.lng));
+          if(z.id===activeZoneId)renderCustomVertexEditor(z);
+          drawZone(z);updateStats();
+        });
+        m.on('contextmenu',function(){
+          z.customVerts.splice(i,1);
+          if(z.id===activeZoneId)renderCustomVertexEditor(z);
+          drawZone(z);updateStats();
+        });
+        return m;
+      });
+    } else {
+      // Standard shape — single center marker + polygon + vertex coord markers
+      z.lpoly=L.polygon(verts.map(v=>[v.lat,v.lng]),{
+        color:c,weight:2.5,fillColor:c,fillOpacity:0.22
+      }).addTo(lmap);
+      z.lpoly.bindTooltip(z.label,{permanent:true,direction:'center',className:'zone-label-tip'});
+      // Vertex coord markers (non-draggable, label only)
+      z.lcustomMarkers=verts.map((v,i)=>{
+        const m=L.marker([v.lat,v.lng],{
+          interactive:false,
+          icon:L.divIcon({className:'',html:vertexMarkerSvg(c,i+1),iconSize:[20,20],iconAnchor:[10,10]})
+        }).addTo(lmap);
+        m.bindTooltip(vertexCoordLabel(v.lat,v.lng),{
+          permanent:true,direction:'top',offset:[0,-12],
+          className:'vertex-coord-tip'
+        });
+        return m;
+      });
+
+      const pinSvg=`<svg width="22" height="32" viewBox="0 0 24 34" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 0C5.37 0 0 5.37 0 12c0 9 12 22 12 22s12-13 12-22C24 5.37 18.63 0 12 0z" fill="${c}" stroke="#fff" stroke-width="2"/>
+        <circle cx="12" cy="12" r="5" fill="#fff"/>
+      </svg>`;
+      z.lmarker=L.marker([z.lat,z.lng],{
+        draggable:true,
+        icon:L.divIcon({className:'',html:pinSvg,iconSize:[22,32],iconAnchor:[11,32],popupAnchor:[0,-32]})
+      }).bindPopup(`<b>${escHtml(z.label)}</b><br>${fmtCoord(z.lat,z.lng)}`).addTo(lmap);
+
+      z.lmarker.on('dragend',function(e){
+        const p=e.target.getLatLng();
+        z.lat=+p.lat.toFixed(7);z.lng=+p.lng.toFixed(7);
+        if(z.id===activeZoneId){
+          document.getElementById('zLat').value=z.lat;
+          document.getElementById('zLng').value=z.lng;
+        }
+        z.lmarker.setPopupContent(`<b>${escHtml(z.label)}</b><br>${fmtCoord(z.lat,z.lng)}`);
+        drawZone(z);if(z.id===activeZoneId)updateStats();
+      });
+    }
+
+  } else if(provider==='google'&&gmap){
+    clearZoneLayers(z);
+    if(!z.visible||!verts.length)return;
+    if(verts.length>=(z.shape==='custom'?2:3)){
+      z.gpoly=new google.maps.Polygon({
+        paths:verts,strokeColor:c,strokeOpacity:.9,strokeWeight:2.5,fillColor:c,fillOpacity:.22,map:gmap,
+        editable:z.shape==='custom', // allow vertex dragging on map for custom
+      });
+      if(z.shape==='custom'){
+        const syncAndRedraw=()=>{
+          z.customVerts=z.gpoly.getPath().getArray().map(p=>({lat:+p.lat().toFixed(7),lng:+p.lng().toFixed(7)}));
+          if(z.id===activeZoneId)renderCustomVertexEditor(z);
+          updateStats();
+          // Redraw to refresh coord labels
+          drawZone(z);
+        };
+        google.maps.event.addListener(z.gpoly.getPath(),'set_at',syncAndRedraw);
+        google.maps.event.addListener(z.gpoly.getPath(),'insert_at',syncAndRedraw);
+        google.maps.event.addListener(z.gpoly.getPath(),'remove_at',syncAndRedraw);
+      }
+      // Vertex coord labels as InfoWindows (non-interactive)
+      z.lcustomMarkers=verts.map((v,i)=>{
+        const iw=new google.maps.InfoWindow({
+          content:`<div class="gm-coord-label"><b>${i+1}</b><br>${toDMS(v.lat,true)}<br>${toDMS(v.lng,false)}</div>`,
+          position:{lat:v.lat,lng:v.lng},
+          disableAutoPan:true,
+        });
+        iw.open(gmap);
+        return iw;
+      });
+    }
+    if(z.shape!=='custom'){
+      z.gmarker=new google.maps.Marker({
+        position:{lat:z.lat,lng:z.lng},map:gmap,draggable:true,
+        label:{text:z.label,color:'#fff',fontSize:'10px',fontWeight:'bold'},
+        icon:{path:google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,scale:6,fillColor:c,fillOpacity:1,strokeColor:'#fff',strokeWeight:2}
+      });
+      z.gmarker.addListener('dragend',function(){
+        const p=z.gmarker.getPosition();
+        z.lat=+p.lat().toFixed(7);z.lng=+p.lng().toFixed(7);
+        if(z.id===activeZoneId){
+          document.getElementById('zLat').value=z.lat;
+          document.getElementById('zLng').value=z.lng;
+        }
+        drawZone(z);if(z.id===activeZoneId)updateStats();
+      });
+    }
+  }
+}
+
+function applyAllZones(){zones.forEach(drawZone);fitAllZones();}
+
+function fitAllZones(){
+  if(provider==='leaflet'&&lmap){
+    const layers=[...zones.filter(z=>z.lpoly&&z.visible).map(z=>z.lpoly),
+                  ...zones.filter(z=>z.lcustomLine&&z.visible).map(z=>z.lcustomLine)];
+    if(!layers.length)return;
+    const bounds=layers.reduce((b,l)=>b.extend(l.getBounds()),layers[0].getBounds());
+    lmap.flyToBounds(bounds,{padding:[40,40],duration:.8});
+  } else if(provider==='google'&&gmap){
+    const b=new google.maps.LatLngBounds();
+    zones.filter(z=>z.visible).forEach(z=>{buildVertices(z).forEach(v=>b.extend(v));});
+    if(!b.isEmpty())gmap.fitBounds(b,60);
+  }
+}
+
+/* ═══════ PROVIDER SWITCH ═══════ */
+function switchProvider(p){
+  if(pinningMode)exitPinMode();
+  provider=p;
+  document.getElementById('tab-leaflet').classList.toggle('active',p==='leaflet');
+  document.getElementById('tab-google').classList.toggle('active',p==='google');
+  document.getElementById('tile-row').style.display=p==='leaflet'?'flex':'none';
+  document.getElementById('gkey-row').style.display=p==='google'?'flex':'none';
+  if(p==='leaflet'){
+    if(gmap)zones.forEach(z=>{
+      if(z.gpoly){z.gpoly.setMap(null);z.gpoly=null;}
+      if(z.gmarker){z.gmarker.setMap(null);z.gmarker=null;}
+      (z.lcustomMarkers||[]).forEach(iw=>{try{iw.close();}catch(e){}});z.lcustomMarkers=[];
+    });
+    document.getElementById('map').innerHTML='';
+    document.getElementById('placeholder').classList.remove('hidden');
+    document.getElementById('ph-msg').textContent='Loading map…';
+    setTimeout(initLeaflet,50);
+  } else {
+    if(lmap){lmap.remove();lmap=null;zones.forEach(z=>{z.lpoly=null;z.lmarker=null;z.lcustomMarkers=[];z.lcustomLine=null;});}
+    document.getElementById('map').innerHTML='';
+    document.getElementById('placeholder').classList.remove('hidden');
+    document.getElementById('ph-msg').innerHTML='Loading Google Maps…';
+    setStatus('','Loading Google Maps…');
+    setTimeout(loadGoogleMap,80);
+  }
+}
+
+/* ═══════ KML / GOOGLE EARTH EXPORT ═══════ */
+function hexToKmlColor(hex,opacity){
+  // KML color = aabbggrr
+  const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+  const a=Math.round(opacity*255);
+  const pad=n=>n.toString(16).padStart(2,'0');
+  return pad(a)+pad(b)+pad(g)+pad(r);
+}
+
+function buildKML(){
+  const placemarks=zones.filter(z=>z.visible).map(z=>{
+    const verts=buildVertices(z);
+    if(verts.length<3)return'';
+    // close the ring
+    const coords=[...verts,verts[0]].map(v=>`${v.lng},${v.lat},0`).join(' ');
+    const lineColor=hexToKmlColor(z.color,0.9);
+    const fillColor=hexToKmlColor(z.color,0.4);
+    const areaHa=z.shape==='custom'?shoelaceAreaHa(verts):z.area;
+    return`  <Placemark>
+    <name>${escHtml(z.label)}</name>
+    <description>${escHtml(z.label)} — ${areaHa.toFixed(3)} ha | ${Math.round(areaHa*10000).toLocaleString()} m² | ${verts.length} vertices</description>
+    <Style>
+      <LineStyle><color>${lineColor}</color><width>2.5</width></LineStyle>
+      <PolyStyle><color>${fillColor}</color></PolyStyle>
+    </Style>
+    <Polygon>
+      <extrude>0</extrude><altitudeMode>clampToGround</altitudeMode>
+      <outerBoundaryIs><LinearRing><coordinates>${coords}</coordinates></LinearRing></outerBoundaryIs>
+    </Polygon>
+  </Placemark>`;
+  }).join('\n');
+
+  return`<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+<Document>
+  <name>Polygon Map Zones</name>
+  <description>Exported from Polygon Map Viewer</description>
+${placemarks}
+</Document>
+</kml>`;
+}
+
+function openGoogleEarthWeb(){
+  const visible=zones.filter(z=>z.visible&&buildVertices(z).length>=3);
+  if(!visible.length){alert('No visible zones with 3+ vertices to view.');return;}
+  const kml=buildKML();
+  // Google Earth Web can load KML via a data URI passed as kmlurl param
+  const dataUri='data:application/vnd.google-earth.kml+xml;charset=utf-8,'+encodeURIComponent(kml);
+  // Centre the view on the first visible zone
+  const z=visible[0];
+  const verts=buildVertices(z);
+  const ctr=centroid(verts);
+  // earth.google.com/web/@lat,lng,altitude,LOOK_AT_RANGE/data=KmlUrl
+  const geUrl=`https://earth.google.com/web/@${ctr.lat.toFixed(6)},${ctr.lng.toFixed(6)},100a,500d/data=${encodeURIComponent(dataUri)}`;
+  window.open(geUrl,'_blank','noopener');
+}
+
+async function exportKML(){
+  const visible=zones.filter(z=>z.visible&&buildVertices(z).length>=3);
+  if(!visible.length){alert('No visible zones with 3+ vertices to export.');return;}
+  const kml=buildKML();
+  const downloads=await window.claude?.use('downloads');
+  if(downloads){
+    try{
+      await downloads.save({filename:'polygon-zones.kml',data:new Blob([kml],{type:'application/vnd.google-earth.kml+xml'})});
+    } catch(e){if(e?.code!=='declined')console.error(e);}
+  } else {
+    // Fallback for non-artifact context
+    const url=URL.createObjectURL(new Blob([kml],{type:'application/vnd.google-earth.kml+xml'}));
+    const a=document.createElement('a');a.href=url;a.download='polygon-zones.kml';
+    document.body.appendChild(a);a.click();
+    setTimeout(()=>{URL.revokeObjectURL(url);a.remove();},1000);
+  }
+}
+
+/* ═══════ COORD BAR ═══════ */
+let coordBarOn=false;
+let gCoordListener=null;
+
+function toggleCoordBar(){
+  coordBarOn=!coordBarOn;
+  const bar=document.getElementById('coordBar');
+  const btn=document.getElementById('coordToggle');
+  bar.classList.toggle('visible',coordBarOn);
+  btn.classList.toggle('active',coordBarOn);
+  btn.style.background=coordBarOn?'#7c8cf8':'';
+  btn.style.color=coordBarOn?'#fff':'';
+  if(!coordBarOn){bar.textContent='';}
+  attachCoordListeners();
+}
+
+function updateCoordBar(lat,lng){
+  if(!coordBarOn)return;
+  document.getElementById('coordBar').textContent=
+    `${lat>=0?'+':''}${lat.toFixed(6)}, ${lng>=0?'+':''}${lng.toFixed(6)}`;
+}
+
+function attachCoordListeners(){
+  // Leaflet
+  if(lmap){
+    lmap.off('mousemove',onLeafletMouseMove);
+    if(coordBarOn)lmap.on('mousemove',onLeafletMouseMove);
+  }
+  // Google Maps — remove old, add new
+  if(gCoordListener){google.maps.event.removeListener(gCoordListener);gCoordListener=null;}
+  if(coordBarOn&&gmap&&typeof google!=='undefined'){
+    gCoordListener=gmap.addListener('mousemove',e=>{
+      if(e.latLng)updateCoordBar(e.latLng.lat(),e.latLng.lng());
+    });
+  }
+}
+
+function onLeafletMouseMove(e){updateCoordBar(e.latlng.lat,e.latlng.lng);}
+
+/* ═══════ MOBILE SHEET ═══════ */
+function isMobile(){return window.innerWidth<=640;}
+
+function openSheet(){
+  if(!isMobile())return;
+  // Move the real sidebar into the sheet-inner
+  const sidebar=document.getElementById('sidebar');
+  const inner=document.getElementById('sheet-inner');
+  if(sidebar.parentNode!==inner) inner.appendChild(sidebar);
+  sidebar.style.display='flex';
+  document.getElementById('sheet').classList.add('open');
+  document.getElementById('sheet-overlay').classList.add('show');
+}
+
+function closeSheet(){
+  document.getElementById('sheet').classList.remove('open');
+  document.getElementById('sheet-overlay').classList.remove('show');
+  // Hide sidebar — keep it inside sheet-inner but invisible; CSS hides it on mobile anyway
+  const sidebar=document.getElementById('sidebar');
+  sidebar.style.display='none';
+}
+
+// On resize to desktop: move sidebar back to workspace and show it
+window.addEventListener('resize',()=>{
+  if(!isMobile()){
+    document.getElementById('sheet').classList.remove('open');
+    document.getElementById('sheet-overlay').classList.remove('show');
+    const sidebar=document.getElementById('sidebar');
+    const workspace=document.querySelector('.workspace');
+    const mapWrap=document.getElementById('map-wrap');
+    if(sidebar.parentNode!==workspace) workspace.insertBefore(sidebar,mapWrap);
+    sidebar.style.display=''; // let CSS control it (flex on desktop)
+  }
+});
+
+/* ═══════ BOOT ═══════ */
+zones.push(newZone({label:'Hectare 1',area:2}));
+renderZoneList();selectZone(zones[0].id);
+
+window.addEventListener('load',()=>{
+  document.getElementById('tile-row').style.display='none';
+  document.getElementById('gkey-row').style.display='flex';
+  provider='google';
+  loadGoogleMap();
+});
+</script>
+<style>
+.zone-label-tip{background:rgba(15,17,23,.85)!important;border:none!important;color:#e2e8f0!important;font-size:11px!important;font-weight:600!important;padding:3px 7px!important;border-radius:4px!important;white-space:nowrap!important;}
+.zone-label-tip::before{display:none!important}
+.vertex-coord-tip{background:rgba(15,17,23,.88)!important;border:1px solid #374151!important;color:#94a3b8!important;font-size:9.5px!important;font-family:monospace!important;font-weight:400!important;padding:3px 7px!important;border-radius:4px!important;white-space:nowrap!important;box-shadow:0 2px 8px rgba(0,0,0,.4)!important;}
+.vertex-coord-tip::before{display:none!important}
+/* Google Maps coord label inside InfoWindow */
+.gm-coord-label{font-family:monospace;font-size:10px;color:#94a3b8;line-height:1.6;padding:1px 2px}
+.gm-coord-label b{color:#7c8cf8;margin-right:4px}
+/* hide InfoWindow chrome (arrow, close button) */
+.gm-style .gm-style-iw-c{padding:4px 8px!important;border-radius:5px!important;background:#1a1d27!important;box-shadow:0 2px 8px rgba(0,0,0,.5)!important}
+.gm-style .gm-style-iw-d{overflow:hidden!important}
+.gm-style .gm-style-iw-t::after{background:#1a1d27!important}
+.gm-style .gm-style-iw button[title="Close"]{display:none!important}
+</style>
+</body>
+</html>
